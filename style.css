@@ -393,7 +393,16 @@ button, input, select, textarea { font-family: inherit; font-size: inherit; colo
 .archive-empty td { text-align: center; color: var(--muted); padding: 24px; }
 
 /* ---------- ورقة PDF ---------- */
-.pdf-sheet { display: none; }
+.pdf-sheet {
+  display: none;
+  width: 800px;
+  max-width: 100%;
+  margin: 0 auto;
+  background: #fff;
+  padding: 28px 30px;
+}
+/* تُعرض الورقة فعلياً أثناء إنشاء PDF (html2canvas لا يصوّر عنصر display:none) */
+.pdf-sheet.rendering { display: block; }
 .pdf-sheet .ps-header {
   text-align: center;
   border-bottom: 3px solid var(--teal);

@@ -176,6 +176,7 @@ $("newPatientForm").addEventListener("submit", async (e) => {
       address: $("pAddress").value.trim() || null,
       chronic: $("pChronic").value.trim() || null,
       condition: $("pCondition").value.trim(),
+      labs: $("pLabs").value.trim() || null,
       notes: $("pNotes").value.trim() || null,
       photo: newPhotoData || null,
       created_at: new Date().toISOString(),
@@ -292,6 +293,7 @@ async function openPatient(id) {
   $("dAddress").textContent = p.address || "—";
   $("dChronic").textContent = p.chronic || "لا يوجد";
   $("dCondition").textContent = p.condition || "—";
+  $("dLabs").textContent = p.labs || "—";
   $("dNotes").textContent = p.notes || "—";
 
   if (p.photo) {
@@ -412,6 +414,7 @@ $("pdfBtn").addEventListener("click", async () => {
       <tr><td class="k">العنوان</td><td>${escapeHtml(p.address) || "—"}</td></tr>
       <tr><td class="k">الأمراض المزمنة / الحساسية</td><td>${escapeHtml(p.chronic) || "لا يوجد"}</td></tr>
       <tr><td class="k">الحالة المرضية</td><td>${escapeHtml(p.condition) || "—"}</td></tr>
+      <tr><td class="k">التحاليل المجرأة</td><td>${escapeHtml(p.labs) || "—"}</td></tr>
       <tr><td class="k">ملاحظات</td><td>${escapeHtml(p.notes) || "—"}</td></tr>
       <tr><td class="k">تاريخ آخر مراجعة</td><td>${fmtDate(p.last_visit || p.created_at)}</td></tr>
     </table>
@@ -437,18 +440,28 @@ $("pdfBtn").addEventListener("click", async () => {
     </div>`;
 
   try {
+    /* إصلاح: html2canvas لا يستطيع تصوير عنصر مخفي بـ display:none
+       فتخرج صفحات PDF فارغة — لذلك نُظهر الورقة فعلياً قبل التصوير ثم نخفيها */
+    $("pdfSheet").classList.add("rendering");
+    $("pdfSheet").scrollIntoView({ behavior: "smooth", block: "start" });
+
+    await document.fonts.ready;
+    await new Promise((r) => setTimeout(r, 250)); // ضمان اكتمال التخطيط وتحميل الصور
+
     await html2pdf().set({
       margin: [10, 10, 10, 10],
       filename: `كشفية-${p.name.replace(/\s+/g, "-")}.pdf`,
       image: { type: "jpeg", quality: 0.92 },
       html2canvas: { scale: 2, useCORS: true },
       jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      pagebreak: { avoid: ["tr", ".ps-visit"] },
     }).from($("pdfSheet")).save();
     toast("تم تنزيل الكشفية بصيغة PDF", "success");
   } catch (err) {
     console.error(err);
     toast("تعذّر إنشاء ملف PDF", "error");
   } finally {
+    $("pdfSheet").classList.remove("rendering");
     btn.disabled = false;
   }
 });

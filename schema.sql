@@ -9,6 +9,7 @@ create table if not exists public.patients (
   address text,
   chronic text,
   condition text,
+  labs text,
   notes text,
   photo text,
   created_at timestamptz not null default now(),
@@ -37,3 +38,6 @@ drop policy if exists "allow all visits" on public.visits;
 create policy "allow all visits" on public.visits for all using (true) with check (true);
 
 create index if not exists idx_visits_patient on public.visits(patient_id);
+
+-- إضافة عمود التحاليل المجرأة لقواعد البيانات الموجودة مسبقاً
+alter table public.patients add column if not exists labs text;
