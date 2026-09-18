@@ -112,7 +112,12 @@ $("navArchive").addEventListener("click", (e) => { e.preventDefault(); loadArchi
 document.querySelectorAll("[data-back]").forEach((btn) => {
   btn.addEventListener("click", () => {
     if (btn.closest("#returningView")) { resetReturning(); showView("returning"); }
-    else if (editingPatientId) { resetPatientFormMode(); showView("returning"); }
+    else if (editingPatientId) {
+      const src = editSourceView;
+      resetPatientFormMode();
+      if (src === "archive") { loadArchive(); showView("archive"); }
+      else showView("returning");
+    }
     else showView("home");
   });
 });
@@ -237,9 +242,11 @@ $("newPatientForm").addEventListener("submit", async (e) => {
 });
 
 /* ---------- فتح نموذج تعديل بيانات مريض (من ملفه أو من الأرشيف) ---------- */
+let editSourceView = "details"; // من أين فُتح التعديل: details أو archive
 function openEditPatientForm(patient) {
   if (!patient) return;
   editingPatientId = patient.id;
+  editSourceView = !$("archiveView").hidden ? "archive" : "details";
   $("newPatientHeading").textContent = "تعديل بيانات المريض";
   $("savePatientBtn").textContent = "حفظ التعديلات";
 
