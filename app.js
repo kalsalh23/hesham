@@ -440,19 +440,21 @@ $("pdfBtn").addEventListener("click", async () => {
     </div>`;
 
   try {
-    /* إصلاح: html2canvas لا يستطيع تصوير عنصر مخفي بـ display:none
-       فتخرج صفحات PDF فارغة — لذلك نُظهر الورقة فعلياً قبل التصوير ثم نخفيها */
+    /* إصلاحان لخلاء PDF:
+       1) html2canvas لا يصوّر عنصر مخفي بـ display:none — لذلك نُظهر الورقة فعلياً قبل التصوير.
+       2) خطأ معروف في html2canvas: التصوير والصفحة مُمرّرة للأسفل يعطي صفحات بيضاء —
+          لذلك نعيد التمرير لأعلى الصفحة فوراً ونثبّت خيارات scrollX/scrollY على الصفر. */
     $("pdfSheet").classList.add("rendering");
-    $("pdfSheet").scrollIntoView({ behavior: "smooth", block: "start" });
+    window.scrollTo(0, 0);
 
     await document.fonts.ready;
-    await new Promise((r) => setTimeout(r, 250)); // ضمان اكتمال التخطيط وتحميل الصور
+    await new Promise((r) => setTimeout(r, 300)); // ضمان اكتمال التخطيط وتحميل الصور
 
     await html2pdf().set({
       margin: [10, 10, 10, 10],
       filename: `كشفية-${p.name.replace(/\s+/g, "-")}.pdf`,
       image: { type: "jpeg", quality: 0.92 },
-      html2canvas: { scale: 2, useCORS: true },
+      html2canvas: { scale: 2, useCORS: true, scrollX: 0, scrollY: 0, backgroundColor: "#ffffff" },
       jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
       pagebreak: { avoid: ["tr", ".ps-visit"] },
     }).from($("pdfSheet")).save();

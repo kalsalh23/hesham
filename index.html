@@ -7,11 +7,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=20260918b">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
 </head>
 <body>
+
+<!-- ورقة PDF — تُعرض أعلى الصفحة أثناء إنشاء الملف ثم تُخفى -->
+<div id="pdfSheet" class="pdf-sheet"></div>
 
 <!-- ============ شاشة الترحيب (3 ثوانٍ) ============ -->
 <div id="splash" class="screen active">
@@ -260,13 +263,10 @@
   </main>
 </div>
 
-<!-- عنصر مخفي لتوليد PDF -->
-<div id="pdfSheet" class="pdf-sheet"></div>
-
 <!-- رسائل النظام -->
 <div id="toast" class="toast" hidden></div>
 
-<script src="config.js"></script>
-<script src="app.js"></script>
+<script src="config.js?v=20260918b"></script>
+<script src="app.js?v=20260918b"></script>
 </body>
 </html>
