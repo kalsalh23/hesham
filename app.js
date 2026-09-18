@@ -112,14 +112,25 @@ $("navArchive").addEventListener("click", (e) => { e.preventDefault(); loadArchi
 document.querySelectorAll("[data-back]").forEach((btn) => {
   btn.addEventListener("click", () => {
     if (btn.closest("#returningView")) { resetReturning(); showView("returning"); }
+    else if (editingPatientId) { resetPatientFormMode(); showView("returning"); }
     else showView("home");
   });
 });
 
 /* =====================================================
-   بطاقة: مريض جديد
+   بطاقة: مريض جديد / تعديل بيانات مريض
    ===================================================== */
+let editingPatientId = null;
+
+/* إعادة النموذج إلى وضع «إضافة مريض جديد» */
+function resetPatientFormMode() {
+  editingPatientId = null;
+  $("newPatientHeading").textContent = "إضافة مريض جديد";
+  $("savePatientBtn").textContent = "حفظ المريض";
+}
+
 $("cardNewPatient").addEventListener("click", () => {
+  resetPatientFormMode();
   $("newPatientForm").reset();
   $("photoPreviewWrap").hidden = true;
   $("photoPreview").removeAttribute("src");
@@ -156,15 +167,13 @@ $("newPatientForm").addEventListener("submit", async (e) => {
   btn.disabled = true;
   btn.textContent = "جارٍ الحفظ…";
   try {
-    // فحص التكرار: نفس رقم الهاتف مسجّل سابقاً
-    const { data: dup, error: dupErr } = await sb
-      .from("patients")
-      .select("id, name, phone")
-      .eq("phone", phone)
-      .maybeSingle();
+    // فحص التكرار: نفس رقم الهاتف مسجّل سابقاً (مع استثناء المريض نفسه أثناء التعديل)
+    let dupQuery = sb.from("patients").select("id, name, phone").eq("phone", phone);
+    if (editingPatientId) dupQuery = dupQuery.neq("id", editingPatientId);
+    const { data: dup, error: dupErr } = await dupQuery.maybeSingle();
     if (dupErr) throw dupErr;
     if (dup) {
-      toast(`تم رفض الإضافة: هذا المريض مسجّل مسبقاً باسم «${dup.name}». استخدم بطاقة «مريض مراجع»`, "error");
+      toast(`تم رفض الحفظ: رقم الهاتف مسجّل مسبقاً باسم «${dup.name}»`, "error");
       return;
     }
 
@@ -179,35 +188,98 @@ $("newPatientForm").addEventListener("submit", async (e) => {
       labs: $("pLabs").value.trim() || null,
       notes: $("pNotes").value.trim() || null,
       photo: newPhotoData || null,
-      created_at: new Date().toISOString(),
-      last_visit: new Date().toISOString(),
     };
 
-    const { data: inserted, error: insErr } = await sb.from("patients").insert(record).select().single();
-    if (insErr) throw insErr;
+    if (editingPatientId) {
+      /* وضع التعديل: تحديث بيانات المريض الحالي والعودة لملفه */
+      const editId = editingPatientId;
+      const { error: upErr } = await sb.from("patients").update(record).eq("id", editId);
+      if (upErr) throw upErr;
 
-    await sb.from("visits").insert({
-      patient_id: inserted.id,
-      visit_date: localDate(),
-      diagnosis: "زيارة أولى — تسجيل المريض",
-      prescription: $("pCondition").value.trim() || null,
-      notes: null,
-      photo: newPhotoData || null,
-      created_at: new Date().toISOString(),
-    });
+      toast(`تم تحديث بيانات المريض «${name}» بنجاح`, "success");
+      resetPatientFormMode();
+      $("newPatientForm").reset();
+      newPhotoData = null;
+      $("photoPreviewWrap").hidden = true;
+      await openPatient(editId);
+      showView("returning");
+    } else {
+      /* وضع الإضافة: مريض جديد + مراجعة أولى */
+      record.created_at = new Date().toISOString();
+      record.last_visit = new Date().toISOString();
 
-    toast(`تم حفظ المريض «${name}» بنجاح في سجل المراجعين`, "success");
-    $("newPatientForm").reset();
-    newPhotoData = null;
-    $("photoPreviewWrap").hidden = true;
-    showView("home");
+      const { data: inserted, error: insErr } = await sb.from("patients").insert(record).select().single();
+      if (insErr) throw insErr;
+
+      await sb.from("visits").insert({
+        patient_id: inserted.id,
+        visit_date: localDate(),
+        diagnosis: "زيارة أولى — تسجيل المريض",
+        prescription: $("pCondition").value.trim() || null,
+        notes: null,
+        photo: newPhotoData || null,
+        created_at: new Date().toISOString(),
+      });
+
+      toast(`تم حفظ المريض «${name}» بنجاح في سجل المراجعين`, "success");
+      $("newPatientForm").reset();
+      newPhotoData = null;
+      $("photoPreviewWrap").hidden = true;
+      showView("home");
+    }
   } catch (err) {
     console.error(err);
     toast("حدث خطأ أثناء الحفظ: " + (err.message || err), "error");
   } finally {
     btn.disabled = false;
-    btn.textContent = "حفظ المريض";
+    btn.textContent = editingPatientId ? "حفظ التعديلات" : "حفظ المريض";
   }
+});
+
+/* ---------- تعديل بيانات المريض الحالي ---------- */
+$("editPatientBtn").addEventListener("click", () => {
+  if (!currentPatient) return;
+  editingPatientId = currentPatient.id;
+  $("newPatientHeading").textContent = "تعديل بيانات المريض";
+  $("savePatientBtn").textContent = "حفظ التعديلات";
+
+  $("pName").value = currentPatient.name || "";
+  $("pPhone").value = currentPatient.phone || "";
+  $("pAge").value = currentPatient.age ?? "";
+  $("pGender").value = currentPatient.gender || "";
+  $("pAddress").value = currentPatient.address || "";
+  $("pChronic").value = currentPatient.chronic || "";
+  $("pCondition").value = currentPatient.condition || "";
+  $("pLabs").value = currentPatient.labs || "";
+  $("pNotes").value = currentPatient.notes || "";
+
+  newPhotoData = currentPatient.photo || null;
+  if (newPhotoData) {
+    $("photoPreview").src = newPhotoData;
+    $("photoPreviewWrap").hidden = false;
+  } else {
+    $("photoPreviewWrap").hidden = true;
+    $("pPhoto").value = "";
+  }
+  showView("newPatient");
+  window.scrollTo(0, 0);
+});
+
+/* ---------- حذف المريض من الأرشيف (مع كل مراجعاته) ---------- */
+$("deletePatientBtn").addEventListener("click", async () => {
+  if (!currentPatient) return;
+  const p = currentPatient;
+  if (!confirm(`هل تريد فعلاً حذف المريض «${p.name}» وكل مراجعاته من الأرشيف؟ لا يمكن التراجع عن هذه العملية.`)) return;
+
+  const { error } = await sb.from("patients").delete().eq("id", p.id);
+  if (error) {
+    console.error(error);
+    toast("تعذّر حذف المريض: " + error.message, "error");
+    return;
+  }
+  toast(`تم حذف المريض «${p.name}» وكل مراجعاته من الأرشيف`, "success");
+  resetReturning();
+  showView("home");
 });
 
 /* =====================================================
@@ -317,6 +389,16 @@ async function openPatient(id) {
         (v.vitals ? `<div class="visit-body"><b>القياسات:</b> ${escapeHtml(v.vitals)}</div>` : "") +
         (v.notes ? `<div class="visit-body"><b>ملاحظات:</b> ${escapeHtml(v.notes)}</div>` : "") +
         (v.photo ? `<div class="visit-photo"><img src="${v.photo}" alt="صورة الدواء / الوصفة"></div>` : "");
+      // النقر على المراجعة ينقل إليها ويبرزها ويختارها تلقائياً للتنزيل PDF
+      li.addEventListener("click", () => {
+        document.querySelectorAll("#dVisitsList li.visit-selected").forEach((x) => x.classList.remove("visit-selected"));
+        li.classList.add("visit-selected");
+        li.scrollIntoView({ behavior: "smooth", block: "center" });
+        const sel = $("pdfVisitSelect");
+        if (currentVisits[0] && currentVisits[0].id === v.id) sel.value = "latest";
+        else if ([...sel.options].some((o) => o.value === v.id)) sel.value = v.id;
+        toast(`تم اختيار مراجعة ${fmtDate(v.visit_date)} — جاهزة للتنزيل بصيغة PDF`);
+      });
       list.appendChild(li);
     });
   }

@@ -138,6 +138,8 @@ button, input, select, textarea { font-family: inherit; font-size: inherit; colo
 .btn-block { width: 100%; margin-top: 20px; }
 .btn-sm { padding: 6px 14px; font-size: 13px; }
 .btn:disabled { opacity: 0.6; cursor: wait; }
+.btn-danger { background: transparent; color: var(--danger); border: 1px solid #f0d5d2; }
+.btn-danger:hover { background: #fdf1f0; border-color: var(--danger); }
 
 /* قائمة اختيار نسخة الكشفية عند الحفظ */
 .pdf-select {
@@ -317,6 +319,7 @@ button, input, select, textarea { font-family: inherit; font-size: inherit; colo
 }
 .patient-head h4 { font-size: 19px; font-weight: 900; }
 .patient-meta { font-size: 12px; color: var(--muted); }
+.patient-head-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .last-visit {
   margin-inline-start: auto;
   text-align: center;
@@ -360,6 +363,14 @@ button, input, select, textarea { font-family: inherit; font-size: inherit; colo
   border-radius: 10px;
   padding: 10px 14px;
   background: #fff;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.visits-list li:hover { background: var(--teal-light); }
+.visits-list li.visit-selected {
+  background: var(--teal-light);
+  border-inline-start-color: var(--teal-dark);
+  box-shadow: inset 0 0 0 1px var(--teal);
 }
 .visits-list .visit-date { font-size: 12px; color: var(--teal-dark); font-weight: 700; }
 .visits-list .visit-body { font-size: 13px; margin-top: 4px; }
