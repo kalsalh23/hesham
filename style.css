@@ -421,6 +421,17 @@ button, input, select, textarea { font-family: inherit; font-size: inherit; colo
   border-radius: 8px; padding: 4px 12px; cursor: pointer; font-size: 12px; font-weight: 700;
 }
 .archive-table .open-btn:hover { background: var(--teal); color: #fff; }
+.archive-table .edit-btn {
+  background: none; border: 1px solid var(--teal-dark); color: var(--teal-dark);
+  border-radius: 8px; padding: 4px 12px; cursor: pointer; font-size: 12px; font-weight: 700;
+}
+.archive-table .edit-btn:hover { background: var(--teal-dark); color: #fff; }
+.archive-table .del-btn {
+  background: none; border: 1px solid var(--danger); color: var(--danger);
+  border-radius: 8px; padding: 4px 12px; cursor: pointer; font-size: 12px; font-weight: 700;
+}
+.archive-table .del-btn:hover { background: var(--danger); color: #fff; }
+.archive-table .row-actions { display: flex; gap: 6px; white-space: nowrap; }
 .archive-empty td { text-align: center; color: var(--muted); padding: 24px; }
 
 /* ---------- ورقة PDF ---------- */

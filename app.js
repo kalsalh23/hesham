@@ -236,24 +236,24 @@ $("newPatientForm").addEventListener("submit", async (e) => {
   }
 });
 
-/* ---------- تعديل بيانات المريض الحالي ---------- */
-$("editPatientBtn").addEventListener("click", () => {
-  if (!currentPatient) return;
-  editingPatientId = currentPatient.id;
+/* ---------- فتح نموذج تعديل بيانات مريض (من ملفه أو من الأرشيف) ---------- */
+function openEditPatientForm(patient) {
+  if (!patient) return;
+  editingPatientId = patient.id;
   $("newPatientHeading").textContent = "تعديل بيانات المريض";
   $("savePatientBtn").textContent = "حفظ التعديلات";
 
-  $("pName").value = currentPatient.name || "";
-  $("pPhone").value = currentPatient.phone || "";
-  $("pAge").value = currentPatient.age ?? "";
-  $("pGender").value = currentPatient.gender || "";
-  $("pAddress").value = currentPatient.address || "";
-  $("pChronic").value = currentPatient.chronic || "";
-  $("pCondition").value = currentPatient.condition || "";
-  $("pLabs").value = currentPatient.labs || "";
-  $("pNotes").value = currentPatient.notes || "";
+  $("pName").value = patient.name || "";
+  $("pPhone").value = patient.phone || "";
+  $("pAge").value = patient.age ?? "";
+  $("pGender").value = patient.gender || "";
+  $("pAddress").value = patient.address || "";
+  $("pChronic").value = patient.chronic || "";
+  $("pCondition").value = patient.condition || "";
+  $("pLabs").value = patient.labs || "";
+  $("pNotes").value = patient.notes || "";
 
-  newPhotoData = currentPatient.photo || null;
+  newPhotoData = patient.photo || null;
   if (newPhotoData) {
     $("photoPreview").src = newPhotoData;
     $("photoPreviewWrap").hidden = false;
@@ -263,24 +263,34 @@ $("editPatientBtn").addEventListener("click", () => {
   }
   showView("newPatient");
   window.scrollTo(0, 0);
-});
+}
 
-/* ---------- حذف المريض من الأرشيف (مع كل مراجعاته) ---------- */
-$("deletePatientBtn").addEventListener("click", async () => {
-  if (!currentPatient) return;
-  const p = currentPatient;
-  if (!confirm(`هل تريد فعلاً حذف المريض «${p.name}» وكل مراجعاته من الأرشيف؟ لا يمكن التراجع عن هذه العملية.`)) return;
+/* ---------- حذف مريض من الأرشيف (مع كل مراجعاته) بعد تأكيد ---------- */
+async function deletePatientFlow(patient, fromArchive) {
+  if (!patient) return;
+  if (!confirm(`هل تريد فعلاً حذف المريض «${patient.name}» وكل مراجعاته من الأرشيف؟ لا يمكن التراجع عن هذه العملية.`)) return;
 
-  const { error } = await sb.from("patients").delete().eq("id", p.id);
+  const { error } = await sb.from("patients").delete().eq("id", patient.id);
   if (error) {
     console.error(error);
     toast("تعذّر حذف المريض: " + error.message, "error");
     return;
   }
-  toast(`تم حذف المريض «${p.name}» وكل مراجعاته من الأرشيف`, "success");
-  resetReturning();
-  showView("home");
-});
+  toast(`تم حذف المريض «${patient.name}» وكل مراجعاته من الأرشيف`, "success");
+
+  if (fromArchive) {
+    archiveCache = archiveCache.filter((x) => x.id !== patient.id);
+    $("statTotal").textContent = archiveCache.length;
+    renderArchive($("archiveSearch").value);
+    if (currentPatient && currentPatient.id === patient.id) resetReturning();
+  } else {
+    resetReturning();
+    showView("home");
+  }
+}
+
+$("editPatientBtn").addEventListener("click", () => openEditPatientForm(currentPatient));
+$("deletePatientBtn").addEventListener("click", () => deletePatientFlow(currentPatient, false));
 
 /* =====================================================
    بطاقة: مريض مراجع — بحث فوري واقتراحات
@@ -635,12 +645,18 @@ function renderArchive(q) {
       <td>${escapeHtml((p.condition || "").slice(0, 40))}${(p.condition || "").length > 40 ? "…" : ""}</td>
       <td>${fmtDate(p.created_at)}</td>
       <td>${fmtDate(p.last_visit || p.created_at)}</td>
-      <td><button class="open-btn">عرض</button></td>`;
+      <td><div class="row-actions">
+        <button class="open-btn">عرض</button>
+        <button class="edit-btn">تعديل</button>
+        <button class="del-btn">حذف</button>
+      </div></td>`;
     tr.querySelector(".open-btn").addEventListener("click", () => {
       showView("returning");
       $("searchInput").value = p.name;
       openPatient(p.id);
     });
+    tr.querySelector(".edit-btn").addEventListener("click", () => openEditPatientForm(p));
+    tr.querySelector(".del-btn").addEventListener("click", () => deletePatientFlow(p, true));
     body.appendChild(tr);
   });
 }
