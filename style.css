@@ -139,6 +139,18 @@ button, input, select, textarea { font-family: inherit; font-size: inherit; colo
 .btn-sm { padding: 6px 14px; font-size: 13px; }
 .btn:disabled { opacity: 0.6; cursor: wait; }
 
+/* قائمة اختيار نسخة الكشفية عند الحفظ */
+.pdf-select {
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fbfdfd;
+  outline: none;
+  max-width: 280px;
+  font-weight: 600;
+}
+.pdf-select:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-light); }
+
 /* ---------- اللوحة ---------- */
 .topbar {
   background: var(--white);
@@ -353,6 +365,14 @@ button, input, select, textarea { font-family: inherit; font-size: inherit; colo
 .visits-list .visit-body { font-size: 13px; margin-top: 4px; }
 .visits-list .visit-body b { color: var(--muted); font-weight: 700; }
 .visits-list .visit-empty { color: var(--muted); font-size: 13px; padding: 4px 0; }
+.visits-list .visit-photo { margin-top: 8px; }
+.visits-list .visit-photo img {
+  display: block;
+  max-width: 220px;
+  max-height: 180px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
 
 /* ---------- الأرشيف ---------- */
 .archive-stats { display: flex; gap: 16px; margin-bottom: 18px; }

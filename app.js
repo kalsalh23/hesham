@@ -315,10 +315,13 @@ async function openPatient(id) {
         (v.diagnosis ? `<div class="visit-body"><b>التشخيص:</b> ${escapeHtml(v.diagnosis)}</div>` : "") +
         (v.prescription ? `<div class="visit-body"><b>الوصفة:</b> ${escapeHtml(v.prescription)}</div>` : "") +
         (v.vitals ? `<div class="visit-body"><b>القياسات:</b> ${escapeHtml(v.vitals)}</div>` : "") +
-        (v.notes ? `<div class="visit-body"><b>ملاحظات:</b> ${escapeHtml(v.notes)}</div>` : "");
+        (v.notes ? `<div class="visit-body"><b>ملاحظات:</b> ${escapeHtml(v.notes)}</div>` : "") +
+        (v.photo ? `<div class="visit-photo"><img src="${v.photo}" alt="صورة الدواء / الوصفة"></div>` : "");
       list.appendChild(li);
     });
   }
+
+  fillPdfVisitSelect();
 
   $("patientDetails").hidden = false;
   $("visitFormCard").hidden = true;
@@ -390,20 +393,74 @@ $("visitForm").addEventListener("submit", async (e) => {
 });
 
 /* =====================================================
-   حفظ الكشفية PDF
+   حفظ الكشفية PDF — آخر مراجعة / مراجعة سابقة / الكشفية الكاملة
    ===================================================== */
+
+/* كتلة مراجعة واحدة لورقة PDF (تشمل صورة الدواء / الوصفة إن وجدت) */
+function pdfVisitBlock(v) {
+  return `
+    <div class="ps-visit">
+      <div class="ps-visit-date">${fmtDate(v.visit_date)}</div>
+      ${v.vitals ? `<p><b>القياسات:</b> ${escapeHtml(v.vitals)}</p>` : ""}
+      ${v.diagnosis ? `<p><b>التشخيص:</b> ${escapeHtml(v.diagnosis)}</p>` : ""}
+      ${v.prescription ? `<p><b>الوصفة:</b> ${escapeHtml(v.prescription)}</p>` : ""}
+      ${v.notes ? `<p><b>ملاحظات:</b> ${escapeHtml(v.notes)}</p>` : ""}
+      ${v.photo ? `<img src="${v.photo}" alt="صورة الدواء / الوصفة">` : ""}
+    </div>`;
+}
+
+/* تعبئة قائمة اختيار نسخة الكشفية — الافتراضي: آخر مراجعة */
+function fillPdfVisitSelect() {
+  const sel = $("pdfVisitSelect");
+  sel.innerHTML = "";
+  if (currentVisits.length) {
+    const latest = document.createElement("option");
+    latest.value = "latest";
+    latest.textContent = "آخر مراجعة — " + fmtDate(currentVisits[0].visit_date);
+    sel.appendChild(latest);
+  }
+  const full = document.createElement("option");
+  full.value = "full";
+  full.textContent = "الكشفية الكاملة — جميع المراجعات";
+  sel.appendChild(full);
+  currentVisits.forEach((v, i) => {
+    if (i === 0) return; // الأحدث مغطاة بخيار «آخر مراجعة»
+    const opt = document.createElement("option");
+    opt.value = v.id;
+    opt.textContent = "مراجعة سابقة — " + fmtDate(v.visit_date);
+    sel.appendChild(opt);
+  });
+  sel.value = currentVisits.length ? "latest" : "full";
+}
+
 $("pdfBtn").addEventListener("click", async () => {
   if (!currentPatient) return;
   const p = currentPatient;
   const btn = $("pdfBtn");
   btn.disabled = true;
 
-  const photoSrc = p.photo || (currentVisits.find((v) => v.photo) || {}).photo || null;
+  const mode = $("pdfVisitSelect").value || "latest";
+  let visits;
+  let scopeLabel;
+  let fileTag;
+  if (mode === "full") {
+    visits = currentVisits;
+    scopeLabel = "الكشفية الكاملة — جميع المراجعات";
+    fileTag = "كاملة";
+  } else {
+    const v = mode === "latest" ? currentVisits[0] : currentVisits.find((x) => x.id === mode) || currentVisits[0];
+    visits = v ? [v] : [];
+    scopeLabel = "مراجعة بتاريخ: " + fmtDate(v ? v.visit_date : p.last_visit || p.created_at);
+    fileTag = v && v.visit_date ? v.visit_date : "مراجعة";
+  }
+
+  /* صورة الوصفة الأولية تُعرض منفصلة فقط إذا لم تظهر ضمن أي مراجعة */
+  const photoSrc = p.photo && !currentVisits.some((x) => x.photo) ? p.photo : null;
 
   $("pdfSheet").innerHTML = `
     <div class="ps-header">
       <h1>عيادة د. هشام الخطاب</h1>
-      <p>كشفية طبية — تاريخ الإصدار: ${fmtDate(new Date())}</p>
+      <p>${scopeLabel} — تاريخ الإصدار: ${fmtDate(new Date())}</p>
     </div>
     <h3>بيانات المريض</h3>
     <table>
@@ -418,21 +475,8 @@ $("pdfBtn").addEventListener("click", async () => {
       <tr><td class="k">ملاحظات</td><td>${escapeHtml(p.notes) || "—"}</td></tr>
       <tr><td class="k">تاريخ آخر مراجعة</td><td>${fmtDate(p.last_visit || p.created_at)}</td></tr>
     </table>
-    <h3>سجل المراجعات</h3>
-    ${currentVisits.length
-      ? currentVisits
-          .map(
-            (v) => `
-      <div class="ps-visit">
-        <div class="ps-visit-date">${fmtDate(v.visit_date)}</div>
-        ${v.vitals ? `<p><b>القياسات:</b> ${escapeHtml(v.vitals)}</p>` : ""}
-        ${v.diagnosis ? `<p><b>التشخيص:</b> ${escapeHtml(v.diagnosis)}</p>` : ""}
-        ${v.prescription ? `<p><b>الوصفة:</b> ${escapeHtml(v.prescription)}</p>` : ""}
-        ${v.notes ? `<p><b>ملاحظات:</b> ${escapeHtml(v.notes)}</p>` : ""}
-      </div>`
-          )
-          .join("")
-      : "<p style='font-size:13px'>لا توجد مراجعات مسجّلة.</p>"}
+    <h3>${mode === "full" ? "سجل المراجعات" : "بيانات المراجعة"}</h3>
+    ${visits.length ? visits.map(pdfVisitBlock).join("") : "<p style='font-size:13px'>لا توجد مراجعات مسجّلة.</p>"}
     ${photoSrc ? `<h3>صورة الوصفة الطبية</h3><img src="${photoSrc}">` : ""}
     <div class="ps-footer">
       <p>توقيع الطبيب: د. هشام الخطاب</p>
@@ -452,7 +496,7 @@ $("pdfBtn").addEventListener("click", async () => {
 
     await html2pdf().set({
       margin: [10, 10, 10, 10],
-      filename: `كشفية-${p.name.replace(/\s+/g, "-")}.pdf`,
+      filename: `كشفية-${p.name.replace(/\s+/g, "-")}-${fileTag}.pdf`,
       image: { type: "jpeg", quality: 0.92 },
       html2canvas: { scale: 2, useCORS: true, scrollX: 0, scrollY: 0, backgroundColor: "#ffffff" },
       jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },

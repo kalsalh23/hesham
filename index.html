@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20260918b">
+<link rel="stylesheet" href="style.css?v=20260919a">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
 </head>
@@ -192,7 +192,8 @@
 
         <div class="form-actions">
           <button type="button" class="btn btn-ghost" data-back>رجوع للبحث</button>
-          <button type="button" class="btn btn-dark" id="pdfBtn">حفظ الكشفية PDF</button>
+          <select id="pdfVisitSelect" class="pdf-select" title="اختر نسخة الكشفية المراد تنزيلها"></select>
+          <button type="button" class="btn btn-dark" id="pdfBtn">حفظ PDF</button>
           <button type="button" class="btn btn-primary" id="newVisitBtn">مراجعة جديدة</button>
         </div>
       </div>
@@ -219,7 +220,7 @@
               <textarea id="vPrescription" rows="3" placeholder="الأدوية والجرعات"></textarea>
             </div>
             <div class="field field-full">
-              <label>صورة الوصفة الجديدة (اختياري)</label>
+              <label>صورة الدواء / الوصفة الجديدة (اختياري)</label>
               <input type="file" id="vPhoto" accept="image/*" class="file-input">
               <div id="vPhotoPreviewWrap" hidden>
                 <img id="vPhotoPreview" alt="معاينة الوصفة">
@@ -266,7 +267,7 @@
 <!-- رسائل النظام -->
 <div id="toast" class="toast" hidden></div>
 
-<script src="config.js?v=20260918b"></script>
-<script src="app.js?v=20260918b"></script>
+<script src="config.js?v=20260919a"></script>
+<script src="app.js?v=20260919a"></script>
 </body>
 </html>
