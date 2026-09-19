@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>عيادة د. هشام الخطاب — لوحة التحكم</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+
+<!-- ============ شاشة الترحيب (3 ثوانٍ) ============ -->
+<div id="splash" class="screen active">
+  <div class="splash-inner">
+    <div class="splash-cross">+</div>
+    <h1>عيادة د. هشام الخطاب</h1>
+    <p>نُهتم بصحتك، مراجعتك أمانة</p>
+    <div class="splash-bar"><span></span></div>
+  </div>
+</div>
+
+<!-- ============ واجهة تسجيل الدخول ============ -->
+<div id="login" class="screen">
+  <div class="login-box">
+    <div class="login-logo">+</div>
+    <h2>عيادة د. هشام الخطاب</h2>
+    <p class="login-sub">تسجيل دخول مدير لوحة التحكم</p>
+    <form id="loginForm">
+      <label>الحساب (البريد الإلكتروني)</label>
+      <input type="email" id="loginEmail" placeholder="example@gmail.com" required autocomplete="username">
+      <label>كلمة السر</label>
+      <input type="password" id="loginPass" placeholder="••••••••" required autocomplete="current-password">
+      <div id="loginError" class="error-msg" hidden>الحساب أو كلمة السر غير صحيحة</div>
+      <button type="submit" class="btn btn-primary btn-block">دخول</button>
+    </form>
+  </div>
+</div>
+
+<!-- ============ واجهة اللوحة الرئيسية ============ -->
+<div id="dashboard" class="screen">
+  <header class="topbar">
+    <div class="topbar-title">
+      <span class="logo-mini">+</span>
+      <div>
+        <strong>لوحة تحكم العيادة</strong>
+        <small>د. هشام الخطاب</small>
+      </div>
+    </div>
+    <nav class="topbar-nav">
+      <a href="#" id="navHome" class="nav-link active">الرئيسية</a>
+      <a href="#" id="navArchive" class="nav-link">أرشيف المرضى</a>
+      <a href="#" id="logoutBtn" class="nav-link nav-logout">خروج</a>
+    </nav>
+  </header>
+
+  <!-- الرئيسية: البطاقتان -->
+  <main id="homeView" class="content">
+    <h3 class="view-heading">اختر العملية</h3>
+    <div class="cards-row">
+      <button class="big-card" id="cardNewPatient">
+        <span class="card-icon">
+          <svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        </span>
+        <span class="card-label">مريض جديد</span>
+        <span class="card-hint">إضافة مريض لأول مرة</span>
+      </button>
+
+      <button class="big-card" id="cardReturning">
+        <span class="card-icon">
+          <svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </span>
+        <span class="card-label">مريض مراجع</span>
+        <span class="card-hint">بحث وعرض كشفية المريض</span>
+      </button>
+    </div>
+  </main>
+
+  <!-- واجهة إضافة مريض جديد -->
+  <main id="newPatientView" class="content" hidden>
+    <h3 class="view-heading">إضافة مريض جديد</h3>
+    <form id="newPatientForm" class="form-card">
+      <div class="form-grid">
+        <div class="field">
+          <label>اسم المريض <em>*</em></label>
+          <input type="text" id="pName" required placeholder="الاسم الكامل">
+        </div>
+        <div class="field">
+          <label>رقم الهاتف <em>*</em></label>
+          <input type="tel" id="pPhone" required placeholder="05xxxxxxxx" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label>العمر</label>
+          <input type="number" id="pAge" min="0" max="130" placeholder="بالسنوات">
+        </div>
+        <div class="field">
+          <label>الجنس</label>
+          <select id="pGender">
+            <option value="">— اختر —</option>
+            <option value="ذكر">ذكر</option>
+            <option value="أنثى">أنثى</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>العنوان</label>
+          <input type="text" id="pAddress" placeholder="المدينة / الحي">
+        </div>
+        <div class="field">
+          <label>الأمراض المزمنة / الحساسية</label>
+          <input type="text" id="pChronic" placeholder="مثال: سكري، ضغط، حساسية بنسلين">
+        </div>
+        <div class="field field-full">
+          <label>الحالة المرضية <em>*</em></label>
+          <textarea id="pCondition" rows="3" required placeholder="وصف الحالة المرضية والشكوى الحالية"></textarea>
+        </div>
+        <div class="field field-full">
+          <label>صورة الوصفة الطبية (إن وجدت)</label>
+          <input type="file" id="pPhoto" accept="image/*" class="file-input">
+          <div id="photoPreviewWrap" hidden>
+            <img id="photoPreview" alt="معاينة الوصفة">
+            <button type="button" id="removePhoto" class="btn btn-ghost btn-sm">إزالة الصورة</button>
+          </div>
+        </div>
+        <div class="field field-full">
+          <label>ملاحظات إضافية</label>
+          <textarea id="pNotes" rows="2" placeholder="أي معلومات إضافية عن المريض"></textarea>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-ghost" data-back>رجوع</button>
+        <button type="submit" class="btn btn-primary" id="savePatientBtn">حفظ المريض</button>
+      </div>
+    </form>
+  </main>
+
+  <!-- واجهة مريض مراجع -->
+  <main id="returningView" class="content" hidden>
+    <h3 class="view-heading">مريض مراجع</h3>
+
+    <div id="searchSection" class="form-card">
+      <div class="field">
+        <label>ابحث عن المريض بالاسم أو رقم الهاتف</label>
+        <input type="text" id="searchInput" placeholder="اكتب حرفاً واحداً على الأقل…" autocomplete="off">
+      </div>
+      <ul id="searchResults" class="search-results" hidden></ul>
+    </div>
+
+    <div id="patientDetails" hidden>
+      <div class="form-card patient-card">
+        <div class="patient-head">
+          <div class="patient-avatar" id="dAvatar">؟</div>
+          <div>
+            <h4 id="dName">—</h4>
+            <span class="patient-meta" id="dSince"></span>
+          </div>
+          <div class="last-visit">
+            <small>تاريخ آخر مراجعة</small>
+            <strong id="dLastVisit">—</strong>
+          </div>
+        </div>
+
+        <div class="detail-grid">
+          <div class="detail-item"><span>رقم الهاتف</span><strong id="dPhone">—</strong></div>
+          <div class="detail-item"><span>العمر</span><strong id="dAge">—</strong></div>
+          <div class="detail-item"><span>الجنس</span><strong id="dGender">—</strong></div>
+          <div class="detail-item"><span>العنوان</span><strong id="dAddress">—</strong></div>
+          <div class="detail-item detail-wide"><span>الأمراض المزمنة / الحساسية</span><strong id="dChronic">—</strong></div>
+          <div class="detail-item detail-wide"><span>الحالة المرضية</span><strong id="dCondition">—</strong></div>
+          <div class="detail-item detail-wide"><span>ملاحظات</span><strong id="dNotes">—</strong></div>
+        </div>
+
+        <div id="dPhotoSection" class="photo-section" hidden>
+          <span class="detail-label">صورة الوصفة الطبية</span>
+          <img id="dPhoto" alt="الوصفة الطبية">
+        </div>
+
+        <div class="visits-section">
+          <h5>سجل المراجعات السابقة</h5>
+          <ul id="dVisitsList" class="visits-list"></ul>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-ghost" data-back>رجوع للبحث</button>
+          <button type="button" class="btn btn-dark" id="pdfBtn">حفظ الكشفية PDF</button>
+          <button type="button" class="btn btn-primary" id="newVisitBtn">مراجعة جديدة</button>
+        </div>
+      </div>
+
+      <!-- نموذج مراجعة جديدة -->
+      <div id="visitFormCard" class="form-card" hidden>
+        <h5 class="form-card-title">مراجعة جديدة — <span id="vPatientName"></span></h5>
+        <form id="visitForm">
+          <div class="form-grid">
+            <div class="field">
+              <label>تاريخ المراجعة</label>
+              <input type="date" id="vDate" required>
+            </div>
+            <div class="field">
+              <label>الوزن / الضغط / الحرارة (اختياري)</label>
+              <input type="text" id="vVitals" placeholder="مثال: ضغط 120/80 — حرارة 37">
+            </div>
+            <div class="field field-full">
+              <label>التشخيص</label>
+              <textarea id="vDiagnosis" rows="2" placeholder="تشخيص الطبيب في هذه المراجعة"></textarea>
+            </div>
+            <div class="field field-full">
+              <label>الوصفة / العلاج الموصوف</label>
+              <textarea id="vPrescription" rows="3" placeholder="الأدوية والجرعات"></textarea>
+            </div>
+            <div class="field field-full">
+              <label>صورة الوصفة الجديدة (اختياري)</label>
+              <input type="file" id="vPhoto" accept="image/*" class="file-input">
+              <div id="vPhotoPreviewWrap" hidden>
+                <img id="vPhotoPreview" alt="معاينة الوصفة">
+                <button type="button" id="vRemovePhoto" class="btn btn-ghost btn-sm">إزالة الصورة</button>
+              </div>
+            </div>
+            <div class="field field-full">
+              <label>ملاحظات</label>
+              <textarea id="vNotes" rows="2"></textarea>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-ghost" id="cancelVisitBtn">إلغاء</button>
+            <button type="submit" class="btn btn-primary" id="saveVisitBtn">حفظ المراجعة</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <!-- واجهة أرشيف المرضى -->
+  <main id="archiveView" class="content" hidden>
+    <h3 class="view-heading">أرشيف المرضى</h3>
+    <div class="archive-stats">
+      <div class="stat"><strong id="statTotal">0</strong><span>إجمالي المرضى</span></div>
+      <div class="stat"><strong id="statVisits">0</strong><span>إجمالي المراجعات</span></div>
+    </div>
+    <div class="form-card">
+      <input type="text" id="archiveSearch" class="archive-search" placeholder="بحث سريع في الأرشيف…">
+      <div class="table-wrap">
+        <table class="archive-table">
+          <thead>
+            <tr>
+              <th>#</th><th>اسم المريض</th><th>الهاتف</th><th>الحالة المرضية</th><th>تاريخ الإضافة</th><th>آخر مراجعة</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="archiveBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- عنصر مخفي لتوليد PDF -->
+<div id="pdfSheet" class="pdf-sheet"></div>
+
+<!-- رسائل النظام -->
+<div id="toast" class="toast" hidden></div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

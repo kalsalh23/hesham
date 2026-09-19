@@ -1,0 +1,446 @@
+:root {
+  --teal: #0e7c7b;
+  --teal-dark: #0a5f5e;
+  --teal-light: #e6f4f4;
+  --ink: #22333b;
+  --muted: #6b7a80;
+  --line: #dce6e6;
+  --bg: #f4f8f8;
+  --white: #ffffff;
+  --danger: #b3423a;
+  --radius: 14px;
+  --shadow: 0 2px 10px rgba(34, 51, 59, 0.08);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; }
+
+body {
+  font-family: "Cairo", "Segoe UI", Tahoma, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+button, input, select, textarea { font-family: inherit; font-size: inherit; color: inherit; }
+
+/* ---------- الشاشات ---------- */
+.screen { display: none; min-height: 100vh; }
+.screen.active { display: block; }
+
+/* ---------- شاشة الترحيب ---------- */
+#splash {
+  background: linear-gradient(160deg, var(--teal-dark) 0%, var(--teal) 70%, #159392 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.splash-inner { text-align: center; color: #fff; padding: 24px; }
+.splash-cross {
+  width: 88px; height: 88px;
+  margin: 0 auto 22px;
+  background: #fff;
+  color: var(--teal);
+  border-radius: 20px;
+  font-size: 64px;
+  font-weight: 900;
+  line-height: 88px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+}
+.splash-inner h1 { font-size: 30px; font-weight: 900; margin-bottom: 6px; }
+.splash-inner p { font-size: 16px; opacity: 0.9; }
+.splash-bar {
+  width: 220px; height: 4px;
+  background: rgba(255,255,255,0.25);
+  border-radius: 4px;
+  margin: 26px auto 0;
+  overflow: hidden;
+}
+.splash-bar span {
+  display: block; height: 100%; width: 0;
+  background: #fff; border-radius: 4px;
+  animation: fill 3s linear forwards;
+}
+@keyframes fill { from { width: 0; } to { width: 100%; } }
+
+/* ---------- تسجيل الدخول ---------- */
+#login {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+#login.active { display: flex; }
+.login-box {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 36px 32px;
+  width: 100%;
+  max-width: 400px;
+}
+.login-logo {
+  width: 56px; height: 56px;
+  background: var(--teal);
+  color: #fff;
+  border-radius: 14px;
+  font-size: 38px;
+  font-weight: 900;
+  line-height: 56px;
+  text-align: center;
+  margin: 0 auto 14px;
+}
+.login-box h2 { text-align: center; font-size: 20px; font-weight: 700; }
+.login-sub { text-align: center; color: var(--muted); font-size: 13px; margin: 4px 0 22px; }
+.login-box label { display: block; font-size: 13px; font-weight: 600; margin: 14px 0 6px; }
+.login-box input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fbfdfd;
+  outline: none;
+}
+.login-box input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-light); }
+.error-msg {
+  color: var(--danger);
+  font-size: 13px;
+  margin-top: 12px;
+  background: #fdf1f0;
+  border: 1px solid #f0d5d2;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+/* ---------- الأزرار ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  border-radius: 10px;
+  padding: 11px 22px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.05s;
+}
+.btn:active { transform: translateY(1px); }
+.btn-primary { background: var(--teal); color: #fff; }
+.btn-primary:hover { background: var(--teal-dark); }
+.btn-dark { background: var(--ink); color: #fff; }
+.btn-dark:hover { background: #101c21; }
+.btn-ghost { background: transparent; color: var(--teal-dark); border: 1px solid var(--line); }
+.btn-ghost:hover { background: var(--teal-light); }
+.btn-block { width: 100%; margin-top: 20px; }
+.btn-sm { padding: 6px 14px; font-size: 13px; }
+.btn:disabled { opacity: 0.6; cursor: wait; }
+
+/* ---------- اللوحة ---------- */
+.topbar {
+  background: var(--white);
+  border-bottom: 1px solid var(--line);
+  padding: 12px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+.topbar-title { display: flex; align-items: center; gap: 12px; }
+.logo-mini {
+  width: 42px; height: 42px;
+  background: var(--teal);
+  color: #fff;
+  border-radius: 11px;
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 42px;
+  text-align: center;
+}
+.topbar-title strong { display: block; font-size: 16px; line-height: 1.3; }
+.topbar-title small { color: var(--muted); font-size: 12px; }
+.topbar-nav { display: flex; gap: 6px; align-items: center; }
+.nav-link {
+  text-decoration: none;
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 14px;
+  padding: 8px 16px;
+  border-radius: 9px;
+}
+.nav-link:hover { background: var(--teal-light); color: var(--teal-dark); }
+.nav-link.active { background: var(--teal); color: #fff; }
+.nav-logout:hover { background: #fdf1f0; color: var(--danger); }
+
+.content { max-width: 900px; margin: 0 auto; padding: 34px 20px 60px; }
+.view-heading { font-size: 20px; font-weight: 900; margin-bottom: 20px; }
+
+/* ---------- البطاقتان الكبيرتان ---------- */
+.cards-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+.big-card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 44px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
+}
+.big-card:hover {
+  border-color: var(--teal);
+  box-shadow: 0 6px 22px rgba(14, 124, 123, 0.18);
+  transform: translateY(-2px);
+}
+.card-icon { color: var(--teal); }
+.card-label { font-size: 21px; font-weight: 900; }
+.card-hint { font-size: 13px; color: var(--muted); }
+
+/* ---------- النماذج ---------- */
+.form-card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 26px 26px 22px;
+  margin-bottom: 20px;
+}
+.form-card-title { font-size: 16px; font-weight: 900; margin-bottom: 16px; color: var(--teal-dark); }
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 20px;
+}
+.field-full { grid-column: 1 / -1; }
+.field label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+.field label em { color: var(--danger); font-style: normal; }
+.field input, .field select, .field textarea {
+  width: 100%;
+  padding: 10px 13px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fbfdfd;
+  outline: none;
+  resize: vertical;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px var(--teal-light);
+}
+.file-input { padding: 8px !important; background: #fbfdfd; }
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 22px;
+  border-top: 1px solid var(--line);
+  padding-top: 18px;
+}
+
+/* معاينة الصورة */
+#photoPreviewWrap, #vPhotoPreviewWrap { margin-top: 10px; }
+#photoPreview, #vPhotoPreview {
+  max-width: 260px;
+  max-height: 200px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  display: block;
+  margin-bottom: 8px;
+}
+
+/* ---------- بحث المرضى ---------- */
+.search-results {
+  list-style: none;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+.search-results li {
+  padding: 11px 15px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--line);
+  background: #fff;
+}
+.search-results li:last-child { border-bottom: none; }
+.search-results li:hover { background: var(--teal-light); }
+.search-results li strong { font-weight: 700; }
+.search-results li small { color: var(--muted); margin-inline-start: 8px; }
+.search-empty { padding: 11px 15px; color: var(--muted); font-size: 13px; }
+
+/* ---------- بطاقة تفاصيل المريض ---------- */
+.patient-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 18px;
+}
+.patient-avatar {
+  width: 58px; height: 58px;
+  background: var(--teal-light);
+  color: var(--teal-dark);
+  border-radius: 50%;
+  font-size: 24px;
+  font-weight: 900;
+  line-height: 58px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.patient-head h4 { font-size: 19px; font-weight: 900; }
+.patient-meta { font-size: 12px; color: var(--muted); }
+.last-visit {
+  margin-inline-start: auto;
+  text-align: center;
+  background: var(--teal-light);
+  border-radius: 10px;
+  padding: 8px 18px;
+}
+.last-visit small { display: block; font-size: 11px; color: var(--teal-dark); }
+.last-visit strong { font-size: 14px; }
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.detail-item {
+  background: #f8fbfb;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+.detail-item span { display: block; font-size: 12px; color: var(--muted); }
+.detail-item strong { font-weight: 600; font-size: 14px; }
+.detail-wide { grid-column: 1 / -1; }
+
+.photo-section { margin-top: 16px; }
+.detail-label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+.photo-section img {
+  max-width: 300px;
+  max-height: 240px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+}
+
+.visits-section { margin-top: 20px; }
+.visits-section h5 { font-size: 15px; font-weight: 900; margin-bottom: 10px; }
+.visits-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.visits-list li {
+  border: 1px solid var(--line);
+  border-inline-start: 3px solid var(--teal);
+  border-radius: 10px;
+  padding: 10px 14px;
+  background: #fff;
+}
+.visits-list .visit-date { font-size: 12px; color: var(--teal-dark); font-weight: 700; }
+.visits-list .visit-body { font-size: 13px; margin-top: 4px; }
+.visits-list .visit-body b { color: var(--muted); font-weight: 700; }
+.visits-list .visit-empty { color: var(--muted); font-size: 13px; padding: 4px 0; }
+
+/* ---------- الأرشيف ---------- */
+.archive-stats { display: flex; gap: 16px; margin-bottom: 18px; }
+.stat {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 14px 28px;
+  text-align: center;
+}
+.stat strong { display: block; font-size: 26px; color: var(--teal-dark); }
+.stat span { font-size: 12px; color: var(--muted); }
+.archive-search {
+  width: 100%;
+  padding: 10px 13px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin-bottom: 14px;
+  outline: none;
+}
+.archive-search:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-light); }
+.table-wrap { overflow-x: auto; }
+.archive-table { width: 100%; border-collapse: collapse; min-width: 640px; }
+.archive-table th, .archive-table td {
+  text-align: right;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+.archive-table th { background: var(--teal-light); color: var(--teal-dark); font-weight: 700; }
+.archive-table tr:hover td { background: #f8fbfb; }
+.archive-table .open-btn {
+  background: none; border: 1px solid var(--teal); color: var(--teal-dark);
+  border-radius: 8px; padding: 4px 12px; cursor: pointer; font-size: 12px; font-weight: 700;
+}
+.archive-table .open-btn:hover { background: var(--teal); color: #fff; }
+.archive-empty td { text-align: center; color: var(--muted); padding: 24px; }
+
+/* ---------- ورقة PDF ---------- */
+.pdf-sheet { display: none; }
+.pdf-sheet .ps-header {
+  text-align: center;
+  border-bottom: 3px solid var(--teal);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+.pdf-sheet .ps-header h1 { font-size: 22px; color: var(--teal-dark); }
+.pdf-sheet .ps-header p { font-size: 13px; color: #444; }
+.pdf-sheet h3 { font-size: 15px; margin: 14px 0 6px; color: var(--teal-dark); }
+.pdf-sheet table { width: 100%; border-collapse: collapse; }
+.pdf-sheet td { padding: 5px 8px; font-size: 13px; border-bottom: 1px dotted #ccc; }
+.pdf-sheet td.k { width: 130px; color: #555; font-weight: 700; }
+.pdf-sheet .ps-visit {
+  border: 1px solid #bbb; border-radius: 8px;
+  padding: 10px 12px; margin-bottom: 10px;
+}
+.pdf-sheet .ps-visit-date { font-weight: 700; color: var(--teal-dark); font-size: 13px; }
+.pdf-sheet .ps-visit p { font-size: 13px; margin-top: 3px; }
+.pdf-sheet img { max-width: 240px; max-height: 200px; border: 1px solid #ccc; border-radius: 6px; margin-top: 8px; }
+.pdf-sheet .ps-footer { margin-top: 22px; text-align: left; font-size: 13px; }
+.pdf-sheet .ps-footer small { color: #666; }
+
+/* ---------- رسالة النظام ---------- */
+.toast {
+  position: fixed;
+  bottom: 28px;
+  right: 50%;
+  transform: translateX(50%);
+  background: var(--ink);
+  color: #fff;
+  padding: 12px 26px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  z-index: 100;
+}
+.toast.success { background: var(--teal-dark); }
+.toast.error { background: var(--danger); }
+
+/* ---------- تجاوب ---------- */
+@media (max-width: 640px) {
+  .cards-row, .form-grid, .detail-grid { grid-template-columns: 1fr; }
+  .topbar { padding: 10px 16px; }
+  .content { padding: 22px 14px 50px; }
+  .last-visit { margin-inline-start: 0; }
+  .form-actions { flex-wrap: wrap; }
+}
