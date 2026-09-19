@@ -39,6 +39,12 @@ function fmtDate(d) {
   return date.toLocaleDateString("ar-EG", { year: "numeric", month: "long", day: "numeric" });
 }
 
+/* التاريخ المحلي للجهاز بصيغة YYYY-MM-DD (بدل التوقيت العالمي) */
+function localDate() {
+  const d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+
 /* صور مصغّرة (تصغير تلقائي قبل الحفظ لتخفيف حجم البيانات) */
 function readImage(file, maxSide = 900, quality = 0.72) {
   return new Promise((resolve, reject) => {
@@ -180,7 +186,7 @@ $("newPatientForm").addEventListener("submit", async (e) => {
 
     await sb.from("visits").insert({
       patient_id: inserted.id,
-      visit_date: new Date().toISOString().slice(0, 10),
+      visit_date: localDate(),
       diagnosis: "زيارة أولى — تسجيل المريض",
       prescription: $("pCondition").value.trim() || null,
       notes: null,
@@ -320,7 +326,7 @@ async function openPatient(id) {
 $("newVisitBtn").addEventListener("click", () => {
   $("vPatientName").textContent = currentPatient.name;
   $("visitForm").reset();
-  $("vDate").value = new Date().toISOString().slice(0, 10);
+  $("vDate").value = localDate();
   vPhotoData = null;
   $("vPhotoPreviewWrap").hidden = true;
   $("visitFormCard").hidden = false;
@@ -353,7 +359,7 @@ $("visitForm").addEventListener("submit", async (e) => {
   btn.disabled = true;
   btn.textContent = "جارٍ الحفظ…";
   try {
-    const visitDate = $("vDate").value || new Date().toISOString().slice(0, 10);
+    const visitDate = $("vDate").value || localDate();
     const { error } = await sb.from("visits").insert({
       patient_id: currentPatient.id,
       visit_date: visitDate,
