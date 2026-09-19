@@ -34,10 +34,8 @@ button, input, select, textarea { font-family: inherit; font-size: inherit; colo
 #splash {
   background: linear-gradient(160deg, var(--teal-dark) 0%, var(--teal) 70%, #159392 100%);
   min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
+#splash.active { display: flex; align-items: center; justify-content: center; }
 .splash-inner { text-align: center; color: #fff; padding: 24px; }
 .splash-cross {
   width: 88px; height: 88px;

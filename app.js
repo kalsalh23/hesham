@@ -12,6 +12,7 @@ const views = { home: $("homeView"), newPatient: $("newPatientView"), returning:
 function showScreen(name) {
   Object.values(screens).forEach((s) => s.classList.remove("active"));
   screens[name].classList.add("active");
+  window.scrollTo(0, 0);
 }
 
 function showView(name) {
