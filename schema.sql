@@ -3,13 +3,14 @@ create extension if not exists "pgcrypto";
 create table if not exists public.patients (
   id uuid primary key default gen_random_uuid(),
   name text not null,
-  phone text not null,
-  age numeric,
+  phone text,
+  age text,
   gender text,
   address text,
   chronic text,
   condition text,
   labs text,
+  prescription text,
   notes text,
   photo text,
   created_at timestamptz not null default now(),
@@ -41,3 +42,9 @@ create index if not exists idx_visits_patient on public.visits(patient_id);
 
 -- إضافة عمود التحاليل المجرأة لقواعد البيانات الموجودة مسبقاً
 alter table public.patients add column if not exists labs text;
+-- إضافة عمود الوصفة الطبية (نص) للمريض
+alter table public.patients add column if not exists prescription text;
+-- رقم الهاتف اختياري: إلغاء إلزاميته
+alter table public.patients alter column phone drop not null;
+-- العمر نصي حر (مثال: 3 أشهر أو 45 سنة)
+alter table public.patients alter column age type text using age::text;

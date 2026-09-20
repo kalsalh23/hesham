@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20260919d">
+<link rel="stylesheet" href="style.css?v=20260920a">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
 </head>
@@ -92,12 +92,12 @@
           <input type="text" id="pName" required placeholder="الاسم الكامل">
         </div>
         <div class="field">
-          <label>رقم الهاتف <em>*</em></label>
-          <input type="tel" id="pPhone" required placeholder="05xxxxxxxx" inputmode="numeric">
+          <label>رقم الهاتف (اختياري)</label>
+          <input type="tel" id="pPhone" placeholder="05xxxxxxxx" inputmode="numeric">
         </div>
         <div class="field">
-          <label>العمر</label>
-          <input type="number" id="pAge" min="0" max="130" placeholder="بالسنوات">
+          <label>العمر (كتابةً)</label>
+          <input type="text" id="pAge" placeholder="مثال: 3 أشهر أو 45 سنة">
         </div>
         <div class="field">
           <label>الجنس</label>
@@ -124,12 +124,8 @@
           <textarea id="pLabs" rows="2" placeholder="مثال: صورة دم كاملة، تحليل سكر صائم، وظائف كبد"></textarea>
         </div>
         <div class="field field-full">
-          <label>صورة الوصفة الطبية (إن وجدت)</label>
-          <input type="file" id="pPhoto" accept="image/*" class="file-input">
-          <div id="photoPreviewWrap" hidden>
-            <img id="photoPreview" alt="معاينة الوصفة">
-            <button type="button" id="removePhoto" class="btn btn-ghost btn-sm">إزالة الصورة</button>
-          </div>
+          <label>الوصفة الطبية (كتابةً — إن وجدت)</label>
+          <textarea id="pPrescription" rows="3" placeholder="الأدوية والجرعات الموصوفة"></textarea>
         </div>
         <div class="field field-full">
           <label>ملاحظات إضافية</label>
@@ -181,6 +177,7 @@
           <div class="detail-item detail-wide"><span>الأمراض المزمنة / الحساسية</span><strong id="dChronic">—</strong></div>
           <div class="detail-item detail-wide"><span>الحالة المرضية</span><strong id="dCondition">—</strong></div>
           <div class="detail-item detail-wide"><span>التحاليل المجرأة</span><strong id="dLabs">—</strong></div>
+          <div class="detail-item detail-wide"><span>الوصفة الطبية</span><strong id="dPrescription">—</strong></div>
           <div class="detail-item detail-wide"><span>ملاحظات</span><strong id="dNotes">—</strong></div>
         </div>
 
@@ -271,7 +268,7 @@
 <!-- رسائل النظام -->
 <div id="toast" class="toast" hidden></div>
 
-<script src="config.js?v=20260919d"></script>
-<script src="app.js?v=20260919d"></script>
+<script src="config.js?v=20260920a"></script>
+<script src="app.js?v=20260920a"></script>
 </body>
 </html>

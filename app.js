@@ -137,28 +137,7 @@ function resetPatientFormMode() {
 $("cardNewPatient").addEventListener("click", () => {
   resetPatientFormMode();
   $("newPatientForm").reset();
-  $("photoPreviewWrap").hidden = true;
-  $("photoPreview").removeAttribute("src");
-  newPhotoData = null;
   showView("newPatient");
-});
-
-let newPhotoData = null;
-$("pPhoto").addEventListener("change", async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  try {
-    newPhotoData = await readImage(file);
-    $("photoPreview").src = newPhotoData;
-    $("photoPreviewWrap").hidden = false;
-  } catch {
-    toast("تعذّر قراءة الصورة", "error");
-  }
-});
-$("removePhoto").addEventListener("click", () => {
-  newPhotoData = null;
-  $("pPhoto").value = "";
-  $("photoPreviewWrap").hidden = true;
 });
 
 $("newPatientForm").addEventListener("submit", async (e) => {
@@ -167,32 +146,34 @@ $("newPatientForm").addEventListener("submit", async (e) => {
   const name = $("pName").value.trim();
   const phone = $("pPhone").value.trim();
 
-  if (!name || !phone) { toast("الاسم ورقم الهاتف مطلوبان", "error"); return; }
+  if (!name) { toast("اسم المريض مطلوب", "error"); return; }
 
   btn.disabled = true;
   btn.textContent = "جارٍ الحفظ…";
   try {
-    // فحص التكرار: نفس رقم الهاتف مسجّل سابقاً (مع استثناء المريض نفسه أثناء التعديل)
-    let dupQuery = sb.from("patients").select("id, name, phone").eq("phone", phone);
-    if (editingPatientId) dupQuery = dupQuery.neq("id", editingPatientId);
-    const { data: dup, error: dupErr } = await dupQuery.maybeSingle();
-    if (dupErr) throw dupErr;
-    if (dup) {
-      toast(`تم رفض الحفظ: رقم الهاتف مسجّل مسبقاً باسم «${dup.name}»`, "error");
-      return;
+    // فحص التكرار: نفس رقم الهاتف مسجّل سابقاً (اختياري الآن — مع استثناء المريض نفسه أثناء التعديل)
+    if (phone) {
+      let dupQuery = sb.from("patients").select("id, name, phone").eq("phone", phone);
+      if (editingPatientId) dupQuery = dupQuery.neq("id", editingPatientId);
+      const { data: dup, error: dupErr } = await dupQuery.maybeSingle();
+      if (dupErr) throw dupErr;
+      if (dup) {
+        toast(`تم رفض الحفظ: رقم الهاتف مسجّل مسبقاً باسم «${dup.name}»`, "error");
+        return;
+      }
     }
 
     const record = {
       name,
-      phone,
-      age: $("pAge").value ? Number($("pAge").value) : null,
+      phone: phone || null,
+      age: $("pAge").value.trim() || null,
       gender: $("pGender").value || null,
       address: $("pAddress").value.trim() || null,
       chronic: $("pChronic").value.trim() || null,
       condition: $("pCondition").value.trim(),
       labs: $("pLabs").value.trim() || null,
+      prescription: $("pPrescription").value.trim() || null,
       notes: $("pNotes").value.trim() || null,
-      photo: newPhotoData || null,
     };
 
     if (editingPatientId) {
@@ -204,8 +185,6 @@ $("newPatientForm").addEventListener("submit", async (e) => {
       toast(`تم تحديث بيانات المريض «${name}» بنجاح`, "success");
       resetPatientFormMode();
       $("newPatientForm").reset();
-      newPhotoData = null;
-      $("photoPreviewWrap").hidden = true;
       await openPatient(editId);
       showView("returning");
     } else {
@@ -220,16 +199,14 @@ $("newPatientForm").addEventListener("submit", async (e) => {
         patient_id: inserted.id,
         visit_date: localDate(),
         diagnosis: "زيارة أولى — تسجيل المريض",
-        prescription: $("pCondition").value.trim() || null,
+        prescription: $("pPrescription").value.trim() || null,
         notes: null,
-        photo: newPhotoData || null,
+        photo: null,
         created_at: new Date().toISOString(),
       });
 
       toast(`تم حفظ المريض «${name}» بنجاح في سجل المراجعين`, "success");
       $("newPatientForm").reset();
-      newPhotoData = null;
-      $("photoPreviewWrap").hidden = true;
       showView("home");
     }
   } catch (err) {
@@ -258,16 +235,8 @@ function openEditPatientForm(patient) {
   $("pChronic").value = patient.chronic || "";
   $("pCondition").value = patient.condition || "";
   $("pLabs").value = patient.labs || "";
+  $("pPrescription").value = patient.prescription || "";
   $("pNotes").value = patient.notes || "";
-
-  newPhotoData = patient.photo || null;
-  if (newPhotoData) {
-    $("photoPreview").src = newPhotoData;
-    $("photoPreviewWrap").hidden = false;
-  } else {
-    $("photoPreviewWrap").hidden = true;
-    $("pPhoto").value = "";
-  }
   showView("newPatient");
   window.scrollTo(0, 0);
 }
@@ -343,7 +312,7 @@ async function searchPatients(q) {
   } else {
     data.forEach((p) => {
       const li = document.createElement("li");
-      li.innerHTML = `<strong>${escapeHtml(p.name)}</strong><small>${escapeHtml(p.phone)}</small>`;
+      li.innerHTML = `<strong>${escapeHtml(p.name)}</strong><small>${escapeHtml(p.phone || "بدون رقم")}</small>`;
       li.addEventListener("click", () => {
         $("searchInput").value = p.name;
         box.hidden = true;
@@ -377,12 +346,13 @@ async function openPatient(id) {
   $("dSince").textContent = "مسجّل منذ: " + fmtDate(p.created_at);
   $("dLastVisit").textContent = fmtDate(p.last_visit || p.created_at);
   $("dPhone").textContent = p.phone || "—";
-  $("dAge").textContent = p.age ? p.age + " سنة" : "—";
+  $("dAge").textContent = p.age || "—";
   $("dGender").textContent = p.gender || "—";
   $("dAddress").textContent = p.address || "—";
   $("dChronic").textContent = p.chronic || "لا يوجد";
   $("dCondition").textContent = p.condition || "—";
   $("dLabs").textContent = p.labs || "—";
+  $("dPrescription").textContent = p.prescription || "—";
   $("dNotes").textContent = p.notes || "—";
 
   if (p.photo) {
@@ -565,12 +535,13 @@ $("pdfBtn").addEventListener("click", async () => {
     <table>
       <tr><td class="k">اسم المريض</td><td>${escapeHtml(p.name)}</td></tr>
       <tr><td class="k">رقم الهاتف</td><td dir="ltr" style="text-align:right">${escapeHtml(p.phone)}</td></tr>
-      <tr><td class="k">العمر</td><td>${p.age ? p.age + " سنة" : "—"}</td></tr>
+      <tr><td class="k">العمر</td><td>${escapeHtml(p.age) || "—"}</td></tr>
       <tr><td class="k">الجنس</td><td>${escapeHtml(p.gender) || "—"}</td></tr>
       <tr><td class="k">العنوان</td><td>${escapeHtml(p.address) || "—"}</td></tr>
       <tr><td class="k">الأمراض المزمنة / الحساسية</td><td>${escapeHtml(p.chronic) || "لا يوجد"}</td></tr>
       <tr><td class="k">الحالة المرضية</td><td>${escapeHtml(p.condition) || "—"}</td></tr>
       <tr><td class="k">التحاليل المجرأة</td><td>${escapeHtml(p.labs) || "—"}</td></tr>
+      <tr><td class="k">الوصفة الطبية</td><td>${escapeHtml(p.prescription) || "—"}</td></tr>
       <tr><td class="k">ملاحظات</td><td>${escapeHtml(p.notes) || "—"}</td></tr>
       <tr><td class="k">تاريخ آخر مراجعة</td><td>${fmtDate(p.last_visit || p.created_at)}</td></tr>
     </table>
@@ -648,7 +619,7 @@ function renderArchive(q) {
     tr.innerHTML = `
       <td>${i + 1}</td>
       <td><strong>${escapeHtml(p.name)}</strong></td>
-      <td dir="ltr" style="text-align:right">${escapeHtml(p.phone)}</td>
+      <td dir="ltr" style="text-align:right">${escapeHtml(p.phone || "—")}</td>
       <td>${escapeHtml((p.condition || "").slice(0, 40))}${(p.condition || "").length > 40 ? "…" : ""}</td>
       <td>${fmtDate(p.created_at)}</td>
       <td>${fmtDate(p.last_visit || p.created_at)}</td>
