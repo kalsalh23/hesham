@@ -9,6 +9,7 @@ create table if not exists public.patients (
   address text,
   chronic text,
   condition text,
+  diagnosis text,
   labs text,
   prescription text,
   notes text,
@@ -44,6 +45,8 @@ create index if not exists idx_visits_patient on public.visits(patient_id);
 alter table public.patients add column if not exists labs text;
 -- إضافة عمود الوصفة الطبية (نص) للمريض
 alter table public.patients add column if not exists prescription text;
+-- إضافة عمود التشخيص للمريض
+alter table public.patients add column if not exists diagnosis text;
 -- رقم الهاتف اختياري: إلغاء إلزاميته
 alter table public.patients alter column phone drop not null;
 -- العمر نصي حر (مثال: 3 أشهر أو 45 سنة)

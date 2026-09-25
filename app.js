@@ -171,6 +171,7 @@ $("newPatientForm").addEventListener("submit", async (e) => {
       address: $("pAddress").value.trim() || null,
       chronic: $("pChronic").value.trim() || null,
       condition: $("pCondition").value.trim(),
+      diagnosis: $("pDiagnosis").value.trim() || null,
       labs: $("pLabs").value.trim() || null,
       prescription: $("pPrescription").value.trim() || null,
       notes: $("pNotes").value.trim() || null,
@@ -234,6 +235,7 @@ function openEditPatientForm(patient) {
   $("pAddress").value = patient.address || "";
   $("pChronic").value = patient.chronic || "";
   $("pCondition").value = patient.condition || "";
+  $("pDiagnosis").value = patient.diagnosis || "";
   $("pLabs").value = patient.labs || "";
   $("pPrescription").value = patient.prescription || "";
   $("pNotes").value = patient.notes || "";
@@ -351,6 +353,7 @@ async function openPatient(id) {
   $("dAddress").textContent = p.address || "—";
   $("dChronic").textContent = p.chronic || "لا يوجد";
   $("dCondition").textContent = p.condition || "—";
+  $("dDiagnosis").textContent = p.diagnosis || "—";
   $("dLabs").textContent = p.labs || "—";
   $("dPrescription").textContent = p.prescription || "—";
   $("dNotes").textContent = p.notes || "—";
@@ -540,6 +543,7 @@ $("pdfBtn").addEventListener("click", async () => {
       <tr><td class="k">العنوان</td><td>${escapeHtml(p.address) || "—"}</td></tr>
       <tr><td class="k">الأمراض المزمنة / الحساسية</td><td>${escapeHtml(p.chronic) || "لا يوجد"}</td></tr>
       <tr><td class="k">الحالة المرضية</td><td>${escapeHtml(p.condition) || "—"}</td></tr>
+      <tr><td class="k">التشخيص</td><td>${escapeHtml(p.diagnosis) || "—"}</td></tr>
       <tr><td class="k">التحاليل المجرأة</td><td>${escapeHtml(p.labs) || "—"}</td></tr>
       <tr><td class="k">الوصفة الطبية</td><td>${escapeHtml(p.prescription) || "—"}</td></tr>
       <tr><td class="k">ملاحظات</td><td>${escapeHtml(p.notes) || "—"}</td></tr>
@@ -620,7 +624,7 @@ function renderArchive(q) {
       <td>${i + 1}</td>
       <td><strong>${escapeHtml(p.name)}</strong></td>
       <td dir="ltr" style="text-align:right">${escapeHtml(p.phone || "—")}</td>
-      <td>${escapeHtml((p.condition || "").slice(0, 40))}${(p.condition || "").length > 40 ? "…" : ""}</td>
+      <td>${escapeHtml((p.diagnosis || "").slice(0, 40))}${(p.diagnosis || "").length > 40 ? "…" : ""}</td>
       <td>${fmtDate(p.created_at)}</td>
       <td>${fmtDate(p.last_visit || p.created_at)}</td>
       <td><div class="row-actions">
