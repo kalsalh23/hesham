@@ -624,6 +624,7 @@ function renderArchive(q) {
       <td>${i + 1}</td>
       <td><strong>${escapeHtml(p.name)}</strong></td>
       <td dir="ltr" style="text-align:right">${escapeHtml(p.phone || "—")}</td>
+      <td>${escapeHtml((p.condition || "").slice(0, 40))}${(p.condition || "").length > 40 ? "…" : ""}</td>
       <td>${escapeHtml((p.diagnosis || "").slice(0, 40))}${(p.diagnosis || "").length > 40 ? "…" : ""}</td>
       <td>${fmtDate(p.created_at)}</td>
       <td>${fmtDate(p.last_visit || p.created_at)}</td>
